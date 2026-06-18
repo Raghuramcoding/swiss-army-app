@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background-color: #1C1E22;
+  margin: 0;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+.pegboard {
+  background-image: radial-gradient(circle, rgba(255,255,255,0.045) 1px, transparent 1.4px);
+  background-size: 16px 16px;
+}
+
+@keyframes clipIn {
+  0% { opacity: 0; transform: translateY(6px) scale(0.99); }
+  60% { opacity: 1; transform: translateY(-1px) scale(1.001); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.tool-enter { animation: clipIn 0.28s cubic-bezier(.2,.7,.3,1); }
+
+@keyframes pegSnap {
+  0% { box-shadow: 0 0 0 0 rgba(232,163,61,0); }
+  35% { box-shadow: -2px 0 0 0 rgba(232,163,61,0.9); }
+  100% { box-shadow: -2px 0 0 0 rgba(232,163,61,1); }
+}
+.peg-active { animation: pegSnap 0.32s ease-out; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tool-enter, .peg-active { animation: none; }
+}
