@@ -307,7 +307,7 @@ export function MarkdownHtmlTool() {
     text = text.replace(/^# (.*)$/gm, "<h1>$1</h1>");
     text = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
     text = text.replace(/\*(.*?)\*/g, "<em>$1</em>");
-    text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+    text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
     text = text.replace(/(^|\n)((?:[-*] .*(?:\n|$))+)/g, (_, lead, block) => {
       const items = block.trim().split("\n").map((l) => `<li>${l.replace(/^[-*] /, "")}</li>`).join("");
       return `${lead}<ul>${items}</ul>`;

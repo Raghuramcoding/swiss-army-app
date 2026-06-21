@@ -65,9 +65,17 @@ function markLessonComplete(langId, lessonKey) {
 // Sub-components
 // ─────────────────────────────────────────────
 
+function sanitize(str) {
+  return str
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/<[\/]*html>|<[\/]*body>|<[\/]*iframe>|<[\/]*object>|<[\/]*embed>/gi, "")
+    .replace(/ on\w+\s*=\s*["'][^"']*["']/gi, "")
+    .replace(/ on\w+\s*=\s*\S+/gi, "");
+}
+
 function MarkdownLite({ content }) {
   // Lightweight renderer: code blocks, inline code, bold, paragraphs
-  const lines = content.split("\n");
+  const lines = sanitize(content).split("\n");
   const elements = [];
   let i = 0;
 

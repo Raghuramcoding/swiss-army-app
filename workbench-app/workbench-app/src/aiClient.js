@@ -1,10 +1,16 @@
-// Unified AI client. Every tool calls callAI(prompt, { system, tool }) and
-// never needs to know which provider — or whether it's the user's own key
-// vs. the hosted Pro backend — is in play.
-
-import { api, getToken } from "./backendClient";
-
 const SETTINGS_KEY = "workbench.aiSettings";
+const FETCH_TIMEOUT = 30000;
+
+async function fetchWithTimeout(url, options = {}) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    return res;
+  } finally {
+    clearTimeout(id);
+  }
+}
 
 export function getSettings() {
   try {
@@ -58,22 +64,9 @@ export const PROVIDERS = {
 export class AIError extends Error {}
 
 export async function callAI(prompt, { system, tool } = {}) {
-  // Pro users (signed in, active subscription) route through the hosted backend —
-  // no personal API key needed. Everyone else uses their own configured provider.
-  if (getToken()) {
-    try {
-      const result = await api.complete(prompt, system, tool);
-      return result.text;
-    } catch (e) {
-      // If the backend says Pro isn't active, fall through to the user's own key if they have one.
-      const settings = getSettings();
-      if (!settings) throw e;
-    }
-  }
-
   const settings = getSettings();
   if (!settings || !settings.provider) {
-    throw new AIError("No AI provider is configured yet. Open Settings to add one, or upgrade to Pro for hosted access.");
+    throw new AIError("No AI provider is configured yet. Open Settings to add one.");
   }
 
   const { provider, apiKey, baseUrl, model } = settings;
@@ -96,7 +89,7 @@ async function callAnthropic({ prompt, system, apiKey, model }) {
 
   let res;
   try {
-    res = await fetch("https://api.anthropic.com/v1/messages", {
+    res = await fetchWithTimeout("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -127,7 +120,7 @@ async function callOpenRouter({ prompt, system, apiKey, model }) {
 
   let res;
   try {
-    res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    res = await fetchWithTimeout("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -162,7 +155,7 @@ async function callOllama({ prompt, system, baseUrl, model }) {
 
   let res;
   try {
-    res = await fetch(`${url}/api/chat`, {
+    res = await fetchWithTimeout(`${url}/api/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

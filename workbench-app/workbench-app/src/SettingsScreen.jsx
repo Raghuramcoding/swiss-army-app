@@ -116,7 +116,7 @@ export default function SettingsScreen({ onSaved, initial, onCancel }) {
               </div>
               <p className="text-xs text-[#5A6068]">
                 Stored only in this browser. Calls go straight from your browser to {info.label} — never through any server of ours.{" "}
-                <a href={info.docsUrl} target="_blank" rel="noreferrer" className="text-teal hover:underline inline-flex items-center gap-0.5">
+                 <a href={info.docsUrl} target="_blank" rel="noopener noreferrer" className="text-teal hover:underline inline-flex items-center gap-0.5">
                   Get a key <ExternalLink size={11} />
                 </a>
               </p>

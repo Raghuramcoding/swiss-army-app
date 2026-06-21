@@ -36,12 +36,12 @@ export default function AuthScreen({ onDone, onSkip }) {
         </div>
 
         <h2 className="text-xl font-semibold mb-1.5">
-          {mode === "signup" ? "Create your Pro account" : "Welcome back"}
+          {mode === "signup" ? "Create an account" : "Welcome back"}
         </h2>
         <p className="text-sm text-[#8B92A0] mb-6">
           {mode === "signup"
-            ? "Pro accounts get hosted AI tools with no API key needed."
-            : "Sign in to manage your Pro subscription."}
+            ? "Sign up to unlock additional features."
+            : "Sign in to your account."}
         </p>
 
         <form onSubmit={submit} className="space-y-3.5">
@@ -90,7 +90,7 @@ export default function AuthScreen({ onDone, onSkip }) {
 
         {onSkip && (
           <button onClick={onSkip} className="text-sm text-[#5A6068] hover:text-white mt-6 block">
-            Skip — I'll use my own API key instead
+            Skip — I'll use my own API key
           </button>
         )}
       </div>

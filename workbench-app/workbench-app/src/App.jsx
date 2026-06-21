@@ -3,13 +3,12 @@ import {
   Code2, FileJson, Diff, Binary, Palette, Regex, Sparkles, Languages,
   FileText, Bug, MessageSquareText, Wand2, ChevronRight, Search, X,
   FileCode2, GitCommitHorizontal, Globe2, Wrench, Github, User, LogOut,
-  Settings as SettingsIcon, Crown, GraduationCap, Workflow,
+  Settings as SettingsIcon, GraduationCap, Workflow,
 } from "lucide-react";
 
 import { AuthProvider, useAuth } from "./AuthContext";
 import SettingsScreen from "./SettingsScreen";
 import AuthScreen from "./AuthScreen";
-import UpgradeScreen from "./UpgradeScreen";
 import { AiDot } from "./components/shared";
 import { getSettings } from "./aiClient";
 
@@ -77,8 +76,8 @@ const TOOLS = [
 
 const ALL_TOOLS = TOOLS.flatMap((g) => g.items);
 
-function AccountMenu({ onOpenSettings, onOpenUpgrade }) {
-  const { user, isPro, logout } = useAuth();
+function AccountMenu({ onOpenSettings, onOpenAuth }) {
+  const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
 
   return (
@@ -87,21 +86,13 @@ function AccountMenu({ onOpenSettings, onOpenUpgrade }) {
         onClick={() => setOpen((o) => !o)}
         className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-white/5 text-sm"
       >
-        <div className={`w-6 h-6 rounded-full flex items-center justify-center ${isPro ? "bg-amber" : "bg-white/10"}`}>
-          {isPro ? <Crown size={12} className="text-ink" /> : <User size={12} className="text-[#8B92A0]" />}
+        <div className="w-6 h-6 rounded-full flex items-center justify-center bg-white/10">
+          <User size={12} className="text-[#8B92A0]" />
         </div>
         <span className="text-[#C7CBD3] truncate max-w-[8rem]">{user ? user.email : "Guest"}</span>
       </button>
       {open && (
         <div className="absolute right-0 mt-1 w-48 rounded-md border border-white/10 bg-panel shadow-xl py-1 z-50">
-          {!isPro && (
-            <button
-              onClick={() => { setOpen(false); onOpenUpgrade(); }}
-              className="w-full text-left px-3 py-2 text-sm text-amber hover:bg-white/5 flex items-center gap-2"
-            >
-              <Crown size={14} /> Upgrade to Pro
-            </button>
-          )}
           <button
             onClick={() => { setOpen(false); onOpenSettings(); }}
             className="w-full text-left px-3 py-2 text-sm text-[#C7CBD3] hover:bg-white/5 flex items-center gap-2"
@@ -118,7 +109,7 @@ function AccountMenu({ onOpenSettings, onOpenUpgrade }) {
           )}
           {!user && (
             <button
-              onClick={() => { setOpen(false); onOpenUpgrade(); }}
+              onClick={() => { setOpen(false); onOpenAuth(); }}
               className="w-full text-left px-3 py-2 text-sm text-[#C7CBD3] hover:bg-white/5 flex items-center gap-2"
             >
               <User size={14} /> Sign in
@@ -131,16 +122,14 @@ function AccountMenu({ onOpenSettings, onOpenUpgrade }) {
 }
 
 function Dashboard() {
-  const { user, isPro, loading } = useAuth();
+  const { user, loading } = useAuth();
   const [activeId, setActiveId] = useState(null);
   const [query, setQuery] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  const [showUpgrade, setShowUpgrade] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
 
-  const hasOwnKey = !!getSettings();
-  const needsAiSetup = !isPro && !hasOwnKey;
+  const needsAiSetup = !user && !getSettings();
 
   const active = ALL_TOOLS.find((t) => t.id === activeId);
 
@@ -176,12 +165,6 @@ function Dashboard() {
           />
         </div>
       )}
-      {showUpgrade && (
-        <UpgradeScreen
-          onSuccess={() => setShowUpgrade(false)}
-          onClose={() => setShowUpgrade(false)}
-        />
-      )}
       {showAuth && (
         <div className="fixed inset-0 z-50 bg-ink overflow-y-auto">
           <AuthScreen onDone={() => setShowAuth(false)} onSkip={() => setShowAuth(false)} />
@@ -195,7 +178,7 @@ function Dashboard() {
           </div>
           <span className="font-mono text-sm font-semibold">Workbench</span>
         </button>
-        <AccountMenu onOpenSettings={() => setShowSettings(true)} onOpenUpgrade={() => (user ? setShowUpgrade(true) : setShowAuth(true))} />
+        <AccountMenu onOpenSettings={() => setShowSettings(true)} onOpenAuth={() => setShowAuth(true)} />
       </div>
 
       {sidebarOpen && (
@@ -223,7 +206,7 @@ function Dashboard() {
             A toolbox for code and AI tasks.
           </p>
           <div className="mt-3 hidden md:block">
-            <AccountMenu onOpenSettings={() => setShowSettings(true)} onOpenUpgrade={() => (user ? setShowUpgrade(true) : setShowAuth(true))} />
+            <AccountMenu onOpenSettings={() => setShowSettings(true)} onOpenAuth={() => setShowAuth(true)} />
           </div>
         </div>
 
@@ -277,19 +260,11 @@ function Dashboard() {
           ))}
         </nav>
 
-        <div className="px-4 py-3 border-t border-white/10 bg-panel/95 space-y-2">
+        <div className="px-4 py-3 border-t border-white/10 bg-panel/95">
           <div className="flex items-center gap-2 text-[11px] text-[#5A6068]">
             <AiDot size={6} />
             <span>marks tools powered by AI</span>
           </div>
-          {!isPro && (
-            <button
-              onClick={() => (user ? setShowUpgrade(true) : setShowAuth(true))}
-              className="w-full text-left text-xs font-mono text-amber hover:underline"
-            >
-              ✦ Upgrade to Pro — no API key needed
-            </button>
-          )}
         </div>
       </aside>
 
