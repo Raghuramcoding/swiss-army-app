@@ -3,7 +3,7 @@ import {
   Code2, FileJson, Diff, Binary, Palette, Regex, Sparkles, Languages,
   FileText, Bug, MessageSquareText, Wand2, ChevronRight, Search, X,
   FileCode2, GitCommitHorizontal, Globe2, Wrench, Github, User, LogOut,
-  Settings as SettingsIcon, Crown, GraduationCap,
+  Settings as SettingsIcon, Crown, GraduationCap, Workflow,
 } from "lucide-react";
 
 import { AuthProvider, useAuth } from "./AuthContext";
@@ -22,8 +22,15 @@ import {
 } from "./tools/aiTools";
 import { GitHubTool } from "./tools/githubTool";
 import { CodingTutorTool } from "./tools/tutorTool";
+import { GraphVisualizerTool } from "./tools/graphTool";
 
 const TOOLS = [
+  {
+    group: "Visualization",
+    items: [
+      { id: "graph", name: "Codebase graph", icon: Workflow, ai: false, desc: "Real-time dependency graph of the codebase.", component: GraphVisualizerTool },
+    ],
+  },
   {
     group: "Learn to code",
     items: [

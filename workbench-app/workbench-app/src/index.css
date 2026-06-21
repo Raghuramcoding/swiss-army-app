@@ -34,6 +34,12 @@ body {
 }
 .peg-active { animation: pegSnap 0.32s ease-out; }
 
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(4px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-in { animation: fadeIn 0.25s ease-out both; }
+
 @media (prefers-reduced-motion: reduce) {
-  .tool-enter, .peg-active { animation: none; }
+  .tool-enter, .peg-active, .animate-in { animation: none; }
 }
