@@ -499,6 +499,7 @@ export function GraphVisualizerTool() {
       canvas.height = rect.height * dpr;
       canvas.style.width = rect.width + "px";
       canvas.style.height = rect.height + "px";
+      ctx.scale(dpr, dpr);
       canvas.__w = rect.width;
       canvas.__h = rect.height;
     };
