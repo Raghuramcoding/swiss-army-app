@@ -260,11 +260,20 @@ function Dashboard() {
           ))}
         </nav>
 
-        <div className="px-4 py-3 border-t border-white/10 bg-panel/95">
+        <div className="px-4 py-3 border-t border-white/10 bg-panel/95 space-y-2">
           <div className="flex items-center gap-2 text-[11px] text-[#5A6068]">
             <AiDot size={6} />
             <span>marks tools powered by AI</span>
           </div>
+          <a
+            href="https://github.com/sponsors/Raghuramcoding"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 text-[11px] text-[#5A6068] hover:text-amber transition-colors"
+          >
+            <svg viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3"><path d="M8 0a8 8 0 110 16A8 8 0 018 0zM4.5 5.5a1 1 0 102 0 1 1 0 00-2 0zm5 0a1 1 0 102 0 1 1 0 00-2 0zm1.535 4.207a.75.75 0 10-1.07-1.05A3.233 3.233 0 018 9.25c-.72 0-1.383-.2-1.965-.593a.75.75 0 10-1.07 1.05A4.734 4.734 0 008 10.75c1.034 0 1.993-.33 2.785-.893z"/></svg>
+            Sponsor
+          </a>
         </div>
       </aside>
 
