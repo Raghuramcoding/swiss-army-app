@@ -163,6 +163,7 @@ function simulateForce(nodes, edges, width, height) {
     n.fy = 0;
   }
 
+  const coulombK = 1200;
   for (let i = 0; i < nodeArr.length; i++) {
     const a = nodeArr[i];
     if (!a.revealed) continue;
@@ -172,7 +173,7 @@ function simulateForce(nodes, edges, width, height) {
       const dx = b.x - a.x;
       const dy = b.y - a.y;
       const dist = Math.max(1, Math.sqrt(dx * dx + dy * dy));
-      const force = 6000 / (dist * dist);
+      const force = coulombK / (dist * dist);
       const fx = (dx / dist) * force;
       const fy = (dy / dist) * force;
       a.fx -= fx;
@@ -191,7 +192,7 @@ function simulateForce(nodes, edges, width, height) {
     const dy = b.y - a.y;
     const dist = Math.max(1, Math.sqrt(dx * dx + dy * dy));
     const targetDist = (a.size + b.size) * 14 + 60;
-    const force = (dist - targetDist) * 0.004;
+    const force = (dist - targetDist) * 0.008;
     const fx = (dx / dist) * force;
     const fy = (dy / dist) * force;
     a.fx += fx;
@@ -204,25 +205,19 @@ function simulateForce(nodes, edges, width, height) {
     if (!n.revealed) continue;
     const dx = centerX - n.x;
     const dy = centerY - n.y;
-    n.fx += dx * 0.005 * (n.group === 0 ? 0.3 : 1);
-    n.fy += dy * 0.005 * (n.group === 0 ? 0.3 : 1);
+    n.fx += dx * 0.015 * (n.group === 0 ? 0.3 : 1);
+    n.fy += dy * 0.015 * (n.group === 0 ? 0.3 : 1);
 
     n.vx = (n.vx || 0) + n.fx;
     n.vy = (n.vy || 0) + n.fy;
 
-    const speed = Math.sqrt(n.vx * n.vx + n.vy * n.vy);
-    if (speed > 6) {
-      n.vx = (n.vx / speed) * 6;
-      n.vy = (n.vy / speed) * 6;
-    }
-
-    n.vx *= 0.82;
-    n.vy *= 0.82;
+    n.vx *= 0.55;
+    n.vy *= 0.55;
 
     n.x += n.vx;
     n.y += n.vy;
 
-    const margin = 30;
+    const margin = 40;
     if (n.x < margin) n.x = margin;
     if (n.x > width - margin) n.x = width - margin;
     if (n.y < margin) n.y = margin;
@@ -365,6 +360,7 @@ export function GraphVisualizerTool() {
   const edgesRef = useRef([]);
   const thoughtsRef = useRef([]);
   const dimsRef = useRef({ w: 600, h: 400 });
+  const logEndRef = useRef(null);
 
   const simRef = useRef({
     nodes: new Map(),
@@ -422,7 +418,7 @@ export function GraphVisualizerTool() {
 
   useEffect(() => { initDemo(); }, [initDemo]);
 
-  const spawnInterval = useMemo(() => Math.max(30, 300 - speed * 2.7), [speed]);
+  const intervalMs = useMemo(() => Math.max(40, 300 - speed * 2.7), [speed]);
 
   useEffect(() => {
     if (!running) return;
@@ -445,10 +441,12 @@ export function GraphVisualizerTool() {
         while (sim.spawnIdx < nodesRef.current.length) {
           const def = nodesRef.current[sim.spawnIdx];
           if (def.phase > sim.phase) break;
+          const cx = dimsRef.current.w / 2;
+          const cy = dimsRef.current.h / 2;
           const node = {
             ...def,
-            x: (containerRef.current?.clientWidth || 600) / 2 + (Math.random() - 0.5) * 200,
-            y: (containerRef.current?.clientHeight || 400) / 2 + (Math.random() - 0.5) * 200,
+            x: cx + (Math.random() - 0.5) * Math.max(100, dimsRef.current.w * 0.3),
+            y: cy + (Math.random() - 0.5) * Math.max(80, dimsRef.current.h * 0.3),
             vx: 0, vy: 0, fx: 0, fy: 0,
             revealed: true, opacity: 0.01,
           };
@@ -477,12 +475,14 @@ export function GraphVisualizerTool() {
         if (remaining.length === 0) { sim.phase = 5; setPhase(5); }
         else { sim.phase++; setPhase(p => p + 1); nextThought(); }
       }
-
-      setStats({ nodes: sim.nodes.size, edges: sim.edges.length });
-    }, 80);
+    }, intervalMs);
 
     return () => clearInterval(interval);
-  }, [running, spawnInterval, resetKey]);
+  }, [running, intervalMs, resetKey]);
+
+  useEffect(() => {
+    logEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [thoughts.length]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -735,7 +735,7 @@ export function GraphVisualizerTool() {
                   </span>
                 </div>
               ))}
-              <div ref={el => el?.scrollIntoView({ behavior: "smooth" })} />
+              <div ref={logEndRef} />
             </div>
           </div>
 
