@@ -364,6 +364,7 @@ export function GraphVisualizerTool() {
   const nodesRef = useRef([]);
   const edgesRef = useRef([]);
   const thoughtsRef = useRef([]);
+  const dimsRef = useRef({ w: 600, h: 400 });
 
   const simRef = useRef({
     nodes: new Map(),
@@ -489,19 +490,14 @@ export function GraphVisualizerTool() {
     if (!canvas || !container) return;
 
     const ctx = canvas.getContext("2d");
-    const sim = simRef.current;
     let frameId;
 
     const resize = () => {
       const rect = container.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
+      dimsRef.current = { w: rect.width, h: rect.height };
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
-      canvas.style.width = rect.width + "px";
-      canvas.style.height = rect.height + "px";
-      ctx.scale(dpr, dpr);
-      canvas.__w = rect.width;
-      canvas.__h = rect.height;
     };
 
     resize();
@@ -509,8 +505,13 @@ export function GraphVisualizerTool() {
     ro.observe(container);
 
     const render = (time) => {
-      const w = canvas.__w || 600;
-      const h = canvas.__h || 400;
+      const sim = simRef.current;
+      const { w, h } = dimsRef.current;
+      const dpr = window.devicePixelRatio || 1;
+
+      if (w < 1 || h < 1) { frameId = requestAnimationFrame(render); return; }
+
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
       for (const n of sim.nodes.values()) {
         if (n.revealed && n.opacity < 1) n.opacity = Math.min(1, n.opacity + 0.04);
@@ -521,6 +522,7 @@ export function GraphVisualizerTool() {
 
       const curHovered = hoveredRef.current;
       const curSelected = selectedRef.current;
+      const currentPhase = sim.phase;
 
       simulateForce(sim.nodes, sim.edges, w, h);
       drawBackground(ctx, w, h);
@@ -528,7 +530,7 @@ export function GraphVisualizerTool() {
       drawEdges(ctx, sim.nodes, sim.edges, curHovered, curSelected);
       drawNodes(ctx, sim.nodes, curHovered, curSelected);
 
-      if (phase < 5 && sim.nodes.size > 0) {
+      if (currentPhase < 5 && sim.nodes.size > 0) {
         const pulseR = (Math.sin(time / 800) + 1) / 2;
         const last = Array.from(sim.nodes.values()).filter(n => n.revealed).slice(-1)[0];
         if (last) {
@@ -543,7 +545,7 @@ export function GraphVisualizerTool() {
         }
       }
 
-      if (phase >= 5) {
+      if (currentPhase >= 5) {
         ctx.save();
         ctx.fillStyle = "rgba(79,183,179,0.15)";
         ctx.font = "bold 12px system-ui, sans-serif";
@@ -559,7 +561,7 @@ export function GraphVisualizerTool() {
 
     frameId = requestAnimationFrame(render);
     return () => { cancelAnimationFrame(frameId); ro.disconnect(); };
-  }, [phase]);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
